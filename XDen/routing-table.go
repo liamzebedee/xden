@@ -6,7 +6,7 @@ import (
 )
 
 /*
-DEN implements a different bucket storage method. 
+XDen implements a different bucket storage method. 
 Like the BitTorrent Mainline DHT, we start with a single bucket. When this bucket reaches it's
 maxSize, one of two things can happen:
 
@@ -20,35 +20,53 @@ the nodes from the old bucket are distributed among the two new ones.
 Unlike Mainline DHT, DENS imposes different size limits on buckets
 */
 type routingTable struct {
-	
+	root *bucket // Bucket at the top of the tree, *king of the jungle*
+	replacementCache *bucket
 }
 
-func (*routingTable) addContact() () {
+func (routingTable *routingTable) getBucketForContact(contact *Contact) *bucket {
+	// While the bucket still has children, 
+	 
+}
+
+// Adds a contact to the appropriate bucket in the routing table
+// Will return false if the contact failed to be added
+func (routingTable *routingTable) addContact(contact *Contact) (contactAdded bool) {
+	// Find appropriate bucket for contact
+	bucket := routingTable.getBucketForContact(contact)
 	
+	for e := bucket.Front(); e != nil; e = e.Next() {
+		if e.Value.(*Contact).nodeID.Equals(&contact.nodeID) {
+			// If the node is already stored, we move it to the front of the list
+			bucket.MoveToBack(e)
+			return true
+		}
+	}
+	
+	// Check if the bucket is full
+	if bucket.Len() == bucket.maxSize {	
+		// Check if our own nodeID falls within the range of the bucket
+			// Split bucket
+			// Reallocate nodes
+			// Add node
+		// Else, PING the last seen node
+		
+			// If they reply, keep them
+				// Add contact to replacement cache
+			// Else replace them
+	}
+	return false
 }
 
 
 type bucket struct {
+	left *bucket
+	right *bucket
 	maxSize int
 	list.List
 	mutex sync.Mutex
 }
 
-func NewBucket(maxSize int32) bucket {
-	bucket := bucket {}
-	// Init maxSize
-	// Init list
-	// Init mutex
-}
-
-func (bucket *bucket) Add(contact *Contact) (error) {
-	
-	if bucket.Len() == bucket.maxSize {
-		// Max capacity
-		
-	} else {
-		// Add node to end of bucket
-		// TODO
-	}
-	return nil
+func (bucket *bucket) hasChildren() bool {
+	return ((bucket.left != nil) && (bucket.right != nil))
 }
