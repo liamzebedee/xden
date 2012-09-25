@@ -26,18 +26,21 @@ The design requirements are intended to guide the development of this project. T
 
 ### Content mechanisms
 #### Replication Model
-* TODO - push-pull or subscribe-update model
+* see #2
 * Objects are replicated according to priority (a field determined by replicator which states the wanted propogation speed) and individual node assessment. 
+
 #### Persistence
 * Object persistence is determined locally. By default the lifetime of all objects is infinite. For update based applications (such as instant messaging), a shorter object expirary can be set locally when instantiating XDen
+
 #### Load balancing
-* TODO
+* see #3
 
 ### Node mechanisms
 #### Reputation
-* TODO
+* see #4
+
 #### Flooding
-* TODO
+* see #5
 
 ### API
-* TODO
+* see #6
