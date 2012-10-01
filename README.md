@@ -6,4 +6,6 @@ XDen is coded in the Go programming language, a concise compiled language that o
 XDen is based on the Kademlia DHT. It's important to state though, XDen isn't a DHT. It's built for mutable data. 
 
 ## Get involved
-To become involved, just go to the issues page of this repository. If you want some extra info, just contact the author, liamzebedee. 
+To become involved, just go to the issues page of this repository. Development is done in the /development branch, which is frequently updated. When XDen reaches a somewhat stable compilation level (that is, tests can run) data will be pushed to /master.
+
+If you want some extra info, just contact me, liamzebedee. 
