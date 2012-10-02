@@ -8,4 +8,4 @@ XDen is based on the Kademlia DHT. It's important to state though, XDen isn't a 
 ## Get involved
 To become involved, just go to the issues page of this repository. Development is done in the /development branch, which is frequently updated. When XDen reaches a somewhat stable compilation level (that is, tests can run) data will be pushed to /master.
 
-If you want some extra info, just contact me, liamzebedee. 
+Make sure to read up on the [design doc](https://github.com/liamzebedee/xden/wiki/Design). If you want some extra info, just contact me, liamzebedee. 
