@@ -2,80 +2,89 @@ package XDen
 
 import (
 	"encoding/hex"
-)
-
-const (
-	KEY_SIZE = 256 / 8
+	"bytes"
+	"github.com/tkawachi/bitset"
 )
 
 // Fundamental data type used for identifying nodes and objects
-type Key [KEY_SIZE]byte
+type Key struct { bitset.BitSet }
+const KEY_SIZE = 256
 
-// XOR the target key against the current key
-func (source *Key) Xor(target *Key) (result *Key) {
-	for i := 0; i < KEY_SIZE; i++ {
-		result[i] = source[i] ^ target[i]
-	}
-	return
+// Returns a new key of size KEY_SIZE
+func NewKey() (Key) {
+	return Key{*bitset.New(KEY_SIZE)}
 }
 
-// Returns the string representation of the key
-func (key *Key) String() string {
-	return hex.EncodeToString(key[0:KEY_SIZE])
+// XOR the target key against the current key and return the result
+func (source *Key) Xor(target *Key) (result Key) {
+	return Key{*source.SymmetricDifference(&target.BitSet)}
 }
 
-// Equates this key to another key, returning true if they are equal
+// Returns a Hex (Base16) representation of the key as a string
+func (key *Key) String() (string) {
+	var buf bytes.Buffer
+	key.WriteTo(&buf)
+	return hex.EncodeToString(buf.Bytes())
+}
+
 func (key *Key) Equals(other *Key) bool {
-	for i := 0; i < KEY_SIZE; i++ {
-		if key[i] != other[i] {
-			return false
-		}
-	}
-	return true
+	return (key.Equal(&other.BitSet))
 }
 
-// 
 func (key *Key) Less(other *Key) bool {
-	for i := 0; i < keyLength; i++ {
-		if key[i] != other[i] {
-			return key[i] < other[i]
+	// Dumping the string is more efficient than using BitSet.Set
+	bits_1 := key.DumpAsBits()
+	bits_2 := key.DumpAsBits()
+	
+	// Iterate through bits in string
+	for i := 0; i < KEY_SIZE; i++ {
+		if bits_1[i] != bits_2[i] {
+			return bits_1[i] < bits_2[i]
 		}
 	}
+	
 	return false
 }
 
-// Returns true if the nth digit is 1
-func (key *Key) PrefixN(n int) bool {
-	for i := 0; i < keyLength; i++ {
-		for j := 0; j < 8; j++ {
-			if (key[i] >> uint8(7-j)) & 0x1 != 0 {
-				return i*8 + j
-			}
-		}
-	}
-	return keyLength*8 - 1
+func (key *Key) isSet(bit uint) bool {
+	return key.Test(bit)
 }
 
-// Returns the 
-// Returns which bucket the node should be stored in (prefix length). 
-// Determined by the number of leading 0 bits in the XOR of our node ID with the target node ID
-func (key *Key) Prefix() (ret int) {
-	// Iterates through each bit in the key, and when it reaches a set bit, it returns the current bitcount
-	for i := 0; i < keyLength; i++ {
-		for j := 0; j < 8; j++ {
-			if (key[i] >> uint8(7-j)) & 0x1 != 0 {
-				return i*8 + j
-			}
-		}
+// Decodes a hexadecimal string into a Key
+func (key *Key) DecodeKey(data string) (result *Key, err error) {
+	decodedData, err := hex.DecodeString(data)
+	if err != nil {
+		return nil, err
 	}
-	return keyLength*8 - 1
+	buf := bytes.NewBuffer(decodedData)
+	// TODO Check if ReadFrom works correctly
+	bitset, err := bitset.ReadFrom(buf)
+	if err != nil {
+		return nil, err
+	}
+	
+	return &Key{*bitset}, nil
 }
 
-// Decodes a Key from a Base16 string
-func DecodeKey(data string) (result *Key) {
-	decoded, _ := hex.DecodeString(data)
-	for i := 0; i < keyLength; i++ {
-		result[i] = decoded[i]
-	}
-	return
+func (key *Key) Prefix() Prefix {
+	return Prefix{key, 0}	
+}
+
+// An n-bit part of a key
+type Prefix struct {
+	*Key
+	end uint // Indicates end of the prefix
+}
+
+func NewPrefix() (Prefix) {
+	key := NewKey()
+	return Prefix{ &key, 0 }	
+}
+
+// Returns true if target is in range of this prefix
+func (prefix *Prefix) inRange(target *Prefix) bool {
+	// Iterate through all bits in prefix
+		// if prefix[bit] != target[prefix]
+			// return false
+	return true	
 }
