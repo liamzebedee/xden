@@ -37,7 +37,7 @@ We also implement an optimization described in part of chapter 4.1 of the full K
 
 type routingTable struct {
 	root *bucket // Bucket at the top of the tree
-	replacementCache *bucket
+	replacementCache *list.List
 	localContact *Contact
 }
 
@@ -46,7 +46,7 @@ const CACHE_BUCKET_SIZE = 32
 
 func NewRoutingTable() (*routingTable) {
 	root := NewBucket(ROOT_BUCKET_SIZE, true, 0)
-	cache := NewBucket(CACHE_BUCKET_SIZE, false, 0)
+	cache := list.New()
 	r := routingTable{ root: root, replacementCache: cache }
 	return &r
 }
@@ -119,14 +119,16 @@ func (routingTable *routingTable) addContact(contact *Contact) (contactAdded boo
 				appropriateBucket.split(leftBucket, rightBucket)
 			}
 		} else {			
-			leastRecentlySeen := appropriateBucket.Front().Value.(*Contact)
+			leastRecentlySeen_e := appropriateBucket.Front()
+			leastRecentlySeen := leastRecentlySeen_e.Value.(*Contact)
 			if(leastRecentlySeen.IsOnline()) {
 				appropriateBucket.update(leastRecentlySeen)
 				routingTable.cacheContact(contact)
 				return false
 			} else {
 				// Else replace them
-				// TODO
+				appropriateBucket.Remove(leastRecentlySeen_e)
+				appropriateBucket.PushBack(contact)
 				return true
 			}
 		}
@@ -135,14 +137,18 @@ func (routingTable *routingTable) addContact(contact *Contact) (contactAdded boo
 	return false
 }
 
-func (routingTable *routingTable) cacheContact(contact *Contact) (contactAdded bool) {
-	return false // TODO
+func (routingTable *routingTable) cacheContact(contact *Contact) {
+	cache := routingTable.replacementCache
+	if cache.Len() == CACHE_BUCKET_SIZE {
+		cache.Remove(cache.Front())
+	}
+	cache.PushBack(contact)
 }
 
 type bucket struct {
 	left      		  *bucket // 0
 	right     		  *bucket // 1
-	maxSize   		  int	  // > 16
+	maxSize   		  int
 	depth     		  uint
 	localNodeInRange  bool
 					  
@@ -189,11 +195,16 @@ func (bucket *bucket) addContact(contact *Contact) bool {
 // Splits a bucket, allocating nodes the left and right buckets appropriately, and then sets it's children to those buckets
 func (bucket *bucket) split(left, right *bucket) {
 	bucket.left, bucket.right = left, right
+	
 	// Go through all nodes, reallocate
 	for e := bucket.Front(); e != nil; e = e.Next() {
 		contact := e.Value.(Contact)
 		if contact.nodeID.isSet(right.depth) {
-			
+			bucket.right.PushBack(contact)
+		} else {
+			bucket.left.PushBack(contact)
 		}
 	}
+	
+	bucket.List.Init() // clears the list
 }
