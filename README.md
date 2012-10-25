@@ -4,6 +4,8 @@ XDen will be the first application designed to run over CJDNS. CJDNS is a routin
 
 Want to learn more? Read the [philosophy](https://github.com/liamzebedee/xden/wiki/Philosophy) and read the [design doc](https://github.com/liamzebedee/xden/wiki/Design)
 
+Don't know what any of this means? Read this [simple intro to XDen](https://github.com/liamzebedee/xden/wiki/Simple-introduction-to-XDen).
+
 ## Get involved
 Want to be involved? [Contact me](http://cryptum.net/contact/).
 
